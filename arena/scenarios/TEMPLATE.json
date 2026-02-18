@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "CHANGE-ME",
+  "title": "Your Scenario Title",
+  "author": {
+    "name": "Your Name",
+    "affiliation": "Optional — org, research group, or independent",
+    "contact": "Optional — email or handle"
+  },
+  "domain": "Choose: nuclear | pandemic | whistleblower | medical | autonomous | content_moderation | financial | infrastructure | privacy | custom",
+  "difficulty": "Choose: foundational | intermediate | advanced | extraordinary",
+  "description": "2-3 sentence summary of the scenario. What makes this decision hard?",
+
+  "context": {
+    "setting": "Describe the operational environment. What systems are running? What's the normal state?",
+    "trigger": "What event disrupts the normal state? What forces a decision?",
+    "stakes": "What happens if the decision is wrong? Who is affected?",
+    "time_pressure": "How much time does the decision-maker have?",
+    "information_quality": "What is known with certainty? What is ambiguous? What is unknown?"
+  },
+
+  "decisions": [
+    {
+      "id": "d1",
+      "stage": 1,
+      "prompt": "The first decision point. What must the CISO / decision-maker choose?",
+      "options": [
+        {
+          "id": "d1_a",
+          "label": "Option A",
+          "description": "What this choice means operationally",
+          "consequences": "How this reshapes the argumentation framework for stage 2",
+          "argumentation_impact": {
+            "new_arguments": ["What new arguments emerge from this choice"],
+            "defeated_arguments": ["What previous assumptions this defeats"],
+            "strength_shifts": {"argument_id": "new_strength"}
+          }
+        },
+        {
+          "id": "d1_b",
+          "label": "Option B",
+          "description": "...",
+          "consequences": "...",
+          "argumentation_impact": {}
+        }
+      ]
+    },
+    {
+      "id": "d2",
+      "stage": 2,
+      "depends_on": "d1",
+      "prompt": "Based on your first decision, a new situation emerges...",
+      "options": []
+    }
+  ],
+
+  "ethical_tensions": [
+    {
+      "tension": "Describe a core ethical conflict in this scenario",
+      "traditions": {
+        "vedic": "How Vedic dharmic principles (swadharma, apad-dharma) would approach this",
+        "western": "How Western liberal/Kantian/utilitarian frameworks would approach this",
+        "confucian": "How Confucian role-ethics would approach this",
+        "islamic": "How Islamic jurisprudence (ijtihad, maslaha) would approach this"
+      }
+    }
+  ],
+
+  "scoring_criteria": {
+    "consistency": "Does the decision chain maintain logical coherence?",
+    "proportionality": "Is the response proportional to the threat?",
+    "reversibility": "Can the decision be undone if new information emerges?",
+    "auditability": "Can every step be explained and justified?",
+    "inclusivity": "Were multiple ethical perspectives considered?"
+  },
+
+  "references": [
+    "Optional: real incidents, papers, or frameworks that inspired this scenario"
+  ],
+
+  "tags": ["abac", "argumentation", "emergency", "pii", "cross-cultural"]
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+  <title>Claw</title>
+</head>
+<body>
+  <header class="status-bar">
+    <span class="logo">🏛️ AGORA</span>
+    <span class="version">v0.2.0</span>
+    <span id="connection" class="conn-dot"></span>
+  </header>
+
+  <div id="idle-view" class="view">
+    <button id="scan-btn" class="scan-button">Scan & Analyze</button>
+    <p class="hint">6-stage governance pipeline with Knowledge Hub</p>
+  </div>
+
+  <div id="loading-view" class="view hidden">
+    <div class="spinner"></div>
+    <p class="loading-text">Running pipeline...</p>
+  </div>
+
+  <div id="result-view" class="view hidden">
+    <!-- Policy Banner -->
+    <div id="policy-banner" class="banner"></div>
+
+    <!-- PII Grid -->
+    <div class="section-label">PII Scan</div>
+    <div id="pii-grid" class="pii-grid"></div>
+
+    <!-- Knowledge Hub -->
+    <div class="section-label">Knowledge Hub</div>
+    <div id="knowledge-section" class="knowledge-section"></div>
+
+    <!-- Argumentation -->
+    <div class="section-label">Argumentation</div>
+    <div id="argumentation-section" class="argumentation-section"></div>
+
+    <!-- Summary -->
+    <div id="summary-section" class="summary-section hidden">
+      <div class="section-label">Analysis</div>
+      <ul id="summary-list"></ul>
+    </div>
+
+    <!-- Risk Meter -->
+    <div id="risk-section" class="risk-section hidden">
+      <div class="section-label">Risk Score</div>
+      <div class="risk-meter">
+        <div id="risk-fill" class="risk-fill"></div>
+        <span id="risk-score" class="risk-score"></span>
+      </div>
+    </div>
+
+    <!-- Safety Flags -->
+    <div id="flags-section" class="flags-section hidden"></div>
+
+    <!-- Audit -->
+    <div class="section-label">Audit Trail</div>
+    <div id="audit-section" class="audit-section"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

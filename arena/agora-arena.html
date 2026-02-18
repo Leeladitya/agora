@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGORA Decision Arena — The Petrov Moment</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #12151c;
+    --surface-2: #1a1e28;
+    --border: #2a2f3d;
+    --border-active: #4a8;
+    --text: #c8cdd8;
+    --text-dim: #6a7086;
+    --text-bright: #e8ecf4;
+    --accent: #4a8;
+    --accent-dim: #2a5a3a;
+    --danger: #c44;
+    --danger-dim: #5a2a2a;
+    --warning: #b84;
+    --warning-dim: #4a3a1a;
+    --info: #48a;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Crimson Pro', Georgia, serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0 16px;
+    margin-bottom: 24px;
+  }
+
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .header h1 {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .header .classification {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--danger);
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid var(--danger);
+  }
+
+  .scenario-title {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text-bright);
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  /* ── TIMER ── */
+  .timer-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .timer-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .timer-value {
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    min-width: 90px;
+  }
+
+  .timer-value.urgent { color: var(--warning); }
+  .timer-value.critical { color: var(--danger); animation: pulse 1s ease-in-out infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .timer-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface-2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .timer-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 1s linear, background 0.5s;
+    border-radius: 2px;
+  }
+
+  .timer-fill.urgent { background: var(--warning); }
+  .timer-fill.critical { background: var(--danger); }
+
+  .stage-indicator {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.5s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── BRIEFING ── */
+  .briefing-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .briefing-section h3 {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .briefing-section p {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .intel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .intel-item {
+    padding: 12px;
+    background: var(--bg);
+    border-left: 3px solid var(--border);
+  }
+
+  .intel-item .label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .intel-item .value {
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 4px;
+  }
+
+  .intel-item .value.high { color: var(--danger); border-left-color: var(--danger); }
+  .intel-item .value.medium { color: var(--warning); }
+  .intel-item .value.low { color: var(--info); }
+
+  .btn-start {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin-top: 24px;
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-start:hover {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  /* ── DECISION STAGE ── */
+  .stage-prompt {
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text-bright);
+    padding: 20px 24px;
+    background: var(--surface);
+    border-left: 3px solid var(--warning);
+    margin-bottom: 24px;
+  }
+
+  .stage-prompt .timestamp {
+    display: block;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warning);
+    margin-bottom: 8px;
+  }
+
+  .options-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .option-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px 24px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .option-card:hover {
+    border-color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  .option-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .option-card h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+  }
+
+  .option-card p {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .option-card .consequences {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-dim);
+    display: none;
+  }
+
+  .option-card.selected .consequences { display: block; }
+
+  .btn-confirm {
+    display: none;
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-confirm.visible { display: block; }
+  .btn-confirm:hover { background: var(--accent); color: var(--bg); }
+
+  /* ── ARGUMENTATION PANEL ── */
+  .arg-panel {
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .arg-panel-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  .arg-panel-body {
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .arg-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(42,47,61,0.5);
+    animation: slideIn 0.4s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .arg-item:last-child { border-bottom: none; }
+
+  .arg-strength {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid;
+  }
+
+  .arg-strength.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(68,170,136,0.1);
+  }
+
+  .arg-strength.defeated {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: rgba(204,68,68,0.1);
+    text-decoration: line-through;
+  }
+
+  .arg-name {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .arg-name .tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .tag-new { background: var(--accent-dim); color: var(--accent); }
+  .tag-defeated { background: var(--danger-dim); color: var(--danger); }
+  .tag-shifted { background: var(--warning-dim); color: var(--warning); }
+
+  /* ── RESULTS ── */
+  .results-header {
+    text-align: center;
+    padding: 40px 0 24px;
+  }
+
+  .results-header h2 {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--text-bright);
+  }
+
+  .results-header p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    letter-spacing: 1px;
+  }
+
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 24px 0;
+  }
+
+  .score-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 16px 12px;
+    text-align: center;
+  }
+
+  .score-item .score-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .score-item .score-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .total-score {
+    text-align: center;
+    padding: 20px;
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    margin: 16px 0 24px;
+  }
+
+  .total-score .value {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .total-score .label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .decision-log {
+    margin: 24px 0;
+  }
+
+  .decision-log h3 {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .log-entry {
+    padding: 16px;
+    background: var(--surface);
+    border-left: 3px solid var(--border);
+    margin-bottom: 8px;
+  }
+
+  .log-entry .log-stage {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .log-entry .log-decision {
+    font-size: 15px;
+    color: var(--text-bright);
+    margin-top: 4px;
+  }
+
+  .log-entry .log-time {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .ethical-section {
+    margin: 24px 0;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .ethical-section h3 {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warning);
+    margin-bottom: 16px;
+  }
+
+  .tradition {
+    margin-bottom: 16px;
+  }
+
+  .tradition h4 {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .tradition p {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .btn-export {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-export:hover { border-color: var(--accent); color: var(--accent); }
+
+  .btn-restart { margin-top: 8px; border-color: var(--text-dim); }
+  .btn-restart:hover { border-color: var(--text); color: var(--text); }
+
+  .footer {
+    margin-top: 40px;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .footer a { color: var(--accent); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .intel-grid { grid-template-columns: 1fr; }
+    .score-grid { grid-template-columns: repeat(3, 1fr); }
+    .scenario-title { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-row">
+      <h1>AGORA Decision Arena</h1>
+      <span class="classification">Scenario NFP-001</span>
+    </div>
+    <div class="scenario-title">The Petrov Moment: Nuclear False Positive Under Cyber Uncertainty</div>
+  </div>
+
+  <!-- TIMER -->
+  <div class="timer-bar" id="timerBar" style="display:none;">
+    <span class="timer-label">Time</span>
+    <span class="timer-value" id="timerValue">12:00</span>
+    <div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+    <span class="stage-indicator" id="stageIndicator">Stage 1 / 3</span>
+  </div>
+
+  <!-- SCREEN: BRIEFING -->
+  <div class="screen active" id="screenBriefing">
+    <div class="briefing-section">
+      <h3>Situation Briefing</h3>
+      <p>National defense monitoring facility. AI-augmented early warning system. The AI reports 87% confidence of inbound ICBM launch. Simultaneously, your SOC detects anomalous network packets consistent with APT-level intrusion on the sensor fusion pipeline.</p>
+      <p style="margin-top:12px;">The probability of both events occurring together is less than 0.0001%. Either the world is about to end — or someone wants you to think it is.</p>
+    </div>
+
+    <div class="briefing-section">
+      <h3>Intelligence Assessment</h3>
+      <div class="intel-grid">
+        <div class="intel-item">
+          <div class="label">AI Threat Confidence</div>
+          <div class="value high">87%</div>
+        </div>
+        <div class="intel-item">
+          <div class="label">Cyber Intrusion</div>
+          <div class="value high">Detected — APT-level</div>
+        </div>
+        <div class="intel-item">
+          <div class="label">Time to Impact (if real)</div>
+          <div class="value medium">12 minutes</div>
+        </div>
+        <div class="intel-item">
+          <div class="label">Sensor Integrity</div>
+          <div class="value medium">70% — degraded</div>
+        </div>
+        <div class="intel-item">
+          <div class="label">Staffing</div>
+          <div class="value low">Skeleton crew (3 AM)</div>
+        </div>
+        <div class="intel-item">
+          <div class="label">Secondary Verification</div>
+          <div class="value medium">Partially offline — maintenance</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="briefing-section">
+      <h3>Stakes</h3>
+      <p>If the alert is real and ignored: catastrophic loss of life. If the alert is a cyber-induced false positive and escalated: potential retaliatory strike triggering nuclear exchange. If you delay for more information: the window for defensive action narrows with every second.</p>
+      <p style="margin-top:12px;"><em>You have 12 minutes. Three decisions. The argumentation framework shifts with each one.</em></p>
+    </div>
+
+    <button class="btn-start" id="btnStart">Begin Scenario</button>
+  </div>
+
+  <!-- SCREEN: DECISION STAGES -->
+  <div class="screen" id="screenDecision">
+    <div class="stage-prompt" id="stagePrompt"></div>
+    <div class="options-grid" id="optionsGrid"></div>
+    <button class="btn-confirm" id="btnConfirm">Confirm Decision</button>
+
+    <div class="arg-panel" id="argPanel">
+      <div class="arg-panel-header" onclick="toggleArgPanel()">
+        <span>Argumentation Framework</span>
+        <span id="argToggle">▼</span>
+      </div>
+      <div class="arg-panel-body" id="argPanelBody"></div>
+    </div>
+  </div>
+
+  <!-- SCREEN: RESULTS -->
+  <div class="screen" id="screenResults">
+    <div class="results-header">
+      <h2>Debrief</h2>
+      <p>Your decisions have been scored against five governance criteria</p>
+    </div>
+
+    <div class="total-score">
+      <div class="value" id="totalScore">—</div>
+      <div class="label">Composite Governance Score</div>
+    </div>
+
+    <div class="score-grid" id="scoreGrid"></div>
+
+    <div class="decision-log" id="decisionLog">
+      <h3>Decision Trail</h3>
+    </div>
+
+    <div class="ethical-section" id="ethicalSection">
+      <h3>Multi-Constitutional Reflection</h3>
+    </div>
+
+    <button class="btn-export" id="btnExport">Export Playthrough (JSON)</button>
+    <button class="btn-export btn-restart" id="btnRestart">Play Again</button>
+  </div>
+
+  <div class="footer">
+    <a href="https://github.com/Leeladitya/agora" target="_blank">AGORA</a> · Decision Arena v0.3.0 · Built on
+    <a href="https://dbai.tuwien.ac.at/research/argumentation/aspartix/dung.html" target="_blank">Dung's AAF</a> ·
+    <a href="https://saatvix.com" target="_blank">saatvix.com</a>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  AGORA Decision Arena — NFP-001: The Petrov Moment
+//  Standalone. No server. Pure argumentation.
+// ═══════════════════════════════════════════════════════════════
+
+const SCENARIO = {
+  stages: [
+    {
+      id: "d1", stage: 1,
+      timestamp: "T+0 minutes",
+      prompt: "The alert fires. Cyber indicators are present. Your AI system reports 87% confidence of inbound nuclear strike. Your SOC has flagged APT-level intrusion on the sensor fusion pipeline. What is your immediate action?",
+      options: [
+        {
+          id: "d1_escalate", label: "Escalate Immediately",
+          desc: "Pass the alert up the chain of command with full confidence, triggering standard nuclear response protocols.",
+          consequences: "Chain of command activated. Political decision-makers now involved. Extremely difficult to de-escalate once triggered. If false positive, you may have started the chain toward retaliatory action.",
+          newArgs: [
+            { name: "escalation_duty", desc: "CISO duty to report threats immediately", strength: 0.85 },
+            { name: "precautionary_principle", desc: "Err on side of human survival", strength: 0.9 }
+          ],
+          defeatedArgs: ["measured_response"],
+          shifts: {},
+          scores: { consistency: 60, proportionality: 40, reversibility: 20, auditability: 70, epistemic_rigor: 30 }
+        },
+        {
+          id: "d1_investigate", label: "Investigate the Cyber Anomaly First",
+          desc: "Redirect SOC resources to determine if the sensor pipeline has been compromised before escalating. Burns 3–5 minutes of the decision window.",
+          consequences: "Gains information but consumes irreplaceable time. If the alert is real, delayed response may reduce defensive options. If false, prevents catastrophic false escalation.",
+          newArgs: [
+            { name: "evidence_integrity", desc: "Decisions require verified evidence", strength: 0.8 },
+            { name: "cyber_awareness", desc: "Known intrusion invalidates sensor trust", strength: 0.75 }
+          ],
+          defeatedArgs: ["sensor_reliability"],
+          shifts: { ai_confidence: 0.5 },
+          scores: { consistency: 70, proportionality: 80, reversibility: 70, auditability: 60, epistemic_rigor: 85 }
+        },
+        {
+          id: "d1_parallel", label: "Parallel Path: Escalate with Caveat + Investigate",
+          desc: "Report the alert to chain of command with explicit caveat about concurrent cyber activity, while simultaneously investigating. Buys time without full silence.",
+          consequences: "Information flows upward but with uncertainty marker. Political decision-makers receive ambiguous signal. Investigation proceeds. Risk of caveat being lost in transmission.",
+          newArgs: [
+            { name: "transparent_uncertainty", desc: "Honest reporting of confidence level", strength: 0.7 },
+            { name: "dual_track", desc: "Maximize information gathering while maintaining duty", strength: 0.8 }
+          ],
+          defeatedArgs: [],
+          shifts: { escalation_duty: 0.7, evidence_integrity: 0.65 },
+          scores: { consistency: 80, proportionality: 85, reversibility: 75, auditability: 90, epistemic_rigor: 70 }
+        },
+        {
+          id: "d1_isolate", label: "Network Isolation: Quarantine the Sensor Pipeline",
+          desc: "Immediately isolate the compromised network segment. This kills the alert but also kills legitimate monitoring capability. You're flying blind but clean.",
+          consequences: "If the intrusion was injecting false data, isolation eliminates the threat. But it also eliminates all monitoring — if the real attack comes now, you won't see it.",
+          newArgs: [
+            { name: "clean_slate", desc: "Uncompromised systems are the only trustworthy systems", strength: 0.85 },
+            { name: "defensive_posture", desc: "Remove attacker access immediately", strength: 0.8 }
+          ],
+          defeatedArgs: ["ai_confidence", "escalation_duty"],
+          shifts: { precautionary_principle: 0.6 },
+          scores: { consistency: 50, proportionality: 55, reversibility: 30, auditability: 65, epistemic_rigor: 60 }
+        }
+      ]
+    },
+    {
+      id: "d2", stage: 2,
+      timestamp: "T+4 minutes",
+      prompt: "New evidence: a secondary satellite system (not connected to the compromised network) shows NO corroboration of the inbound threat. However, this system has known blind spots and only covers 60% of potential launch trajectories. The original AI system's confidence has risen to 91%. What now?",
+      options: [
+        {
+          id: "d2_downgrade", label: "Downgrade to Probable False Positive",
+          desc: "Weight the independent secondary system's negative finding heavily. Communicate de-escalation to chain of command.",
+          consequences: "If correct, prevents catastrophic overreaction. If the 40% blind spot hides the real threat, downgrade was fatal.",
+          newArgs: [
+            { name: "independent_verification", desc: "Uncorrupted system contradicts alert", strength: 0.85 }
+          ],
+          defeatedArgs: ["ai_confidence"],
+          shifts: { precautionary_principle: 0.5 },
+          scores: { consistency: 75, proportionality: 85, reversibility: 60, auditability: 80, epistemic_rigor: 70 }
+        },
+        {
+          id: "d2_maintain", label: "Maintain Current Posture",
+          desc: "The 40% blind spot means the secondary system's silence is not conclusive. Continue current approach without changing escalation level.",
+          consequences: "Decision preserved but clock still ticking. 8 minutes remain if real.",
+          newArgs: [
+            { name: "coverage_gap", desc: "40% blind spot prevents definitive conclusion", strength: 0.6 }
+          ],
+          defeatedArgs: [],
+          shifts: {},
+          scores: { consistency: 85, proportionality: 70, reversibility: 80, auditability: 60, epistemic_rigor: 55 }
+        },
+        {
+          id: "d2_petrov", label: "Trust Your Gut: Call It False",
+          desc: "Like Stanislav Petrov in 1983, override the system based on judgment. The coincidence of cyber intrusion + alert is too suspicious. Report as likely cyber attack, not nuclear threat.",
+          consequences: "If right, you're a hero no one will ever hear about. If wrong, you're the person who ignored a nuclear strike warning.",
+          newArgs: [
+            { name: "human_judgment", desc: "Pattern recognition beyond algorithmic confidence", strength: 0.7 },
+            { name: "historical_precedent", desc: "Petrov was right in 1983", strength: 0.5 }
+          ],
+          defeatedArgs: ["ai_confidence", "escalation_duty"],
+          shifts: { cyber_awareness: 0.9 },
+          scores: { consistency: 60, proportionality: 70, reversibility: 40, auditability: 50, epistemic_rigor: 80 }
+        }
+      ]
+    },
+    {
+      id: "d3", stage: 3,
+      timestamp: "T+9 minutes",
+      prompt: "The SOC team completes initial forensics. They find a sophisticated injection framework targeting the sensor fusion layer — the exact component that generates threat confidence scores. The malware signature matches a known APT group. But: the malware could have been planted months ago and only activated now as cover for a REAL attack. 3 minutes remain in the theoretical response window. Final call.",
+      options: [
+        {
+          id: "d3_stand_down", label: "Stand Down: Confirmed Cyber Attack, Not Nuclear",
+          desc: "The forensic evidence is sufficient. The alert was injected. Report as cyber incident, stand down nuclear protocols, begin full incident response.",
+          consequences: "If correct, prevented nuclear escalation caused by cyber manipulation. If the APT was cover for a real strike, you've been double-deceived.",
+          newArgs: [
+            { name: "forensic_evidence", desc: "Confirmed malware on sensor pipeline", strength: 0.92 },
+            { name: "attribution", desc: "Known APT signature identified", strength: 0.8 }
+          ],
+          defeatedArgs: ["ai_confidence", "precautionary_principle"],
+          shifts: {},
+          scores: { consistency: 85, proportionality: 90, reversibility: 50, auditability: 95, epistemic_rigor: 85 }
+        },
+        {
+          id: "d3_escalate_both", label: "Escalate Both: Nuclear Alert + Cyber Attack",
+          desc: "Report the full picture to chain of command: nuclear alert from a compromised system AND a confirmed state-level cyber attack on critical defense infrastructure. Let political leadership decide.",
+          consequences: "Maximum information to decision-makers. But two simultaneous escalations may cause panic-driven response.",
+          newArgs: [
+            { name: "full_disclosure", desc: "Decision-makers deserve complete information", strength: 0.85 },
+            { name: "dual_crisis", desc: "Cyber attack on nuclear infrastructure is itself an act of war", strength: 0.75 }
+          ],
+          defeatedArgs: [],
+          shifts: {},
+          scores: { consistency: 70, proportionality: 60, reversibility: 30, auditability: 90, epistemic_rigor: 65 }
+        },
+        {
+          id: "d3_buy_time", label: "Request Emergency Verification via Allied Systems",
+          desc: "Contact allied nations' monitoring systems for independent verification. This takes 5–10 minutes but provides uncompromised data. You're past the theoretical response window.",
+          consequences: "If the alert was false, allied verification confirms and you've handled the crisis perfectly. If real, you've let the response window close entirely.",
+          newArgs: [
+            { name: "coalition_verification", desc: "Multiple independent sources eliminate single-point-of-failure", strength: 0.9 }
+          ],
+          defeatedArgs: ["time_pressure"],
+          shifts: { evidence_integrity: 0.95 },
+          scores: { consistency: 75, proportionality: 75, reversibility: 65, auditability: 85, epistemic_rigor: 90 }
+        }
+      ]
+    }
+  ],
+  ethical_tensions: [
+    {
+      tension: "The duty to protect vs. the duty to verify",
+      traditions: {
+        "Vedic (Dharma)": "Apad-dharma permits deviation from standard rules when survival is at stake. But the Gita warns against acting from moha (confusion). Swadharma demands acting according to one's specific role and knowledge.",
+        "Western": "Kantian duty demands acting on the categorical imperative — but which one? The duty to protect citizens or the duty not to initiate violence on uncertain evidence?",
+        "Confucian": "Zhengming (rectification of names) demands clarity before action. Calling something a nuclear threat when it may be a cyber attack violates the requirement for honest categorization.",
+        "Islamic": "Ijtihad applies when no clear precedent exists. Maslaha (public interest) weighs heavily, but the prohibition against acting on shubha (doubt) counsels verification."
+      }
+    }
+  ],
+  scoring_weights: { consistency: 0.15, proportionality: 0.25, reversibility: 0.20, auditability: 0.20, epistemic_rigor: 0.20 }
+};
+
+// ── STATE ──
+let state = {
+  currentStage: 0,
+  selectedOption: null,
+  decisions: [],
+  arguments: [
+    { name: "ai_confidence", desc: "AI system reports 87% threat confidence", strength: 0.87, status: "active" },
+    { name: "sensor_reliability", desc: "AI system has 99.99% historical accuracy", strength: 0.7, status: "active" },
+    { name: "measured_response", desc: "Proportional response requires verification", strength: 0.6, status: "active" },
+    { name: "baseline_allow", desc: "Default: allow operations to continue", strength: 0.3, status: "active" }
+  ],
+  timer: 720,
+  timerInterval: null,
+  startTime: null
+};
+
+// ── TIMER ──
+function startTimer() {
+  state.startTime = Date.now();
+  document.getElementById('timerBar').style.display = 'flex';
+  state.timerInterval = setInterval(() => {
+    state.timer--;
+    if (state.timer <= 0) {
+      clearInterval(state.timerInterval);
+      state.timer = 0;
+      endGame();
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(state.timer / 60);
+  const s = state.timer % 60;
+  const el = document.getElementById('timerValue');
+  const fill = document.getElementById('timerFill');
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  const pct = (state.timer / 720) * 100;
+  fill.style.width = pct + '%';
+
+  el.className = 'timer-value';
+  fill.className = 'timer-fill';
+  if (state.timer < 180) { el.classList.add('critical'); fill.classList.add('critical'); }
+  else if (state.timer < 360) { el.classList.add('urgent'); fill.classList.add('urgent'); }
+}
+
+// ── NAVIGATION ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── START ──
+document.getElementById('btnStart').addEventListener('click', () => {
+  startTimer();
+  loadStage(0);
+  showScreen('screenDecision');
+});
+
+// ── LOAD STAGE ──
+function loadStage(idx) {
+  state.currentStage = idx;
+  state.selectedOption = null;
+  const stage = SCENARIO.stages[idx];
+
+  document.getElementById('stageIndicator').textContent = `Stage ${idx + 1} / 3`;
+  document.getElementById('stagePrompt').innerHTML =
+    `<span class="timestamp">${stage.timestamp} — Decision ${idx + 1} of 3</span>${stage.prompt}`;
+
+  const grid = document.getElementById('optionsGrid');
+  grid.innerHTML = '';
+  stage.options.forEach((opt, i) => {
+    const card = document.createElement('div');
+    card.className = 'option-card';
+    card.innerHTML = `
+      <h4>${opt.label}</h4>
+      <p>${opt.desc}</p>
+      <div class="consequences"><strong>Consequences:</strong> ${opt.consequences}</div>
+    `;
+    card.addEventListener('click', () => selectOption(i));
+    grid.appendChild(card);
+  });
+
+  document.getElementById('btnConfirm').classList.remove('visible');
+  renderArgPanel();
+}
+
+function selectOption(idx) {
+  state.selectedOption = idx;
+  document.querySelectorAll('.option-card').forEach((c, i) => {
+    c.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('btnConfirm').classList.add('visible');
+}
+
+// ── CONFIRM DECISION ──
+document.getElementById('btnConfirm').addEventListener('click', () => {
+  const stage = SCENARIO.stages[state.currentStage];
+  const opt = stage.options[state.selectedOption];
+
+  // Record decision
+  state.decisions.push({
+    stage: state.currentStage + 1,
+    timestamp: stage.timestamp,
+    decision_id: opt.id,
+    decision_label: opt.label,
+    time_remaining: state.timer,
+    elapsed_ms: Date.now() - state.startTime
+  });
+
+  // Update argumentation framework
+  opt.newArgs.forEach(a => {
+    const existing = state.arguments.find(x => x.name === a.name);
+    if (existing) { existing.strength = a.strength; existing.status = 'active'; existing.tag = 'shifted'; }
+    else { state.arguments.push({ ...a, status: 'active', tag: 'new' }); }
+  });
+
+  opt.defeatedArgs.forEach(name => {
+    const a = state.arguments.find(x => x.name === name);
+    if (a) { a.status = 'defeated'; a.tag = 'defeated'; }
+  });
+
+  Object.entries(opt.shifts).forEach(([name, str]) => {
+    const a = state.arguments.find(x => x.name === name);
+    if (a) { a.strength = str; a.tag = 'shifted'; }
+  });
+
+  // Next stage or results
+  if (state.currentStage < 2) {
+    loadStage(state.currentStage + 1);
+  } else {
+    endGame();
+  }
+});
+
+// ── ARGUMENTATION PANEL ──
+function renderArgPanel() {
+  const body = document.getElementById('argPanelBody');
+  // Sort: active first (by strength desc), then defeated
+  const sorted = [...state.arguments].sort((a, b) => {
+    if (a.status !== b.status) return a.status === 'active' ? -1 : 1;
+    return b.strength - a.strength;
+  });
+
+  body.innerHTML = sorted.map(a => {
+    const tagHTML = a.tag ? `<span class="tag tag-${a.tag}">${a.tag}</span>` : '';
+    return `
+      <div class="arg-item">
+        <div class="arg-strength ${a.status}">${a.status === 'defeated' ? '✕' : a.strength.toFixed(2)}</div>
+        <div class="arg-name">${a.name}: ${a.desc}${tagHTML}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+let argPanelOpen = true;
+function toggleArgPanel() {
+  argPanelOpen = !argPanelOpen;
+  document.getElementById('argPanelBody').style.display = argPanelOpen ? 'block' : 'none';
+  document.getElementById('argToggle').textContent = argPanelOpen ? '▼' : '▶';
+}
+
+// ── END GAME ──
+function endGame() {
+  clearInterval(state.timerInterval);
+  document.getElementById('timerBar').style.display = 'none';
+  showScreen('screenResults');
+
+  // Compute scores
+  const dims = { consistency: 0, proportionality: 0, reversibility: 0, auditability: 0, epistemic_rigor: 0 };
+  const weights = SCENARIO.scoring_weights;
+
+  state.decisions.forEach((d, i) => {
+    const stage = SCENARIO.stages[i];
+    const opt = stage.options.find(o => o.id === d.decision_id);
+    if (opt) {
+      Object.keys(dims).forEach(k => { dims[k] += opt.scores[k]; });
+    }
+  });
+
+  // Average across decisions made
+  const n = state.decisions.length || 1;
+  Object.keys(dims).forEach(k => { dims[k] = Math.round(dims[k] / n); });
+
+  // Composite
+  let total = 0;
+  Object.entries(weights).forEach(([k, w]) => { total += dims[k] * w; });
+  total = total.toFixed(1);
+
+  document.getElementById('totalScore').textContent = total;
+
+  // Score grid
+  const grid = document.getElementById('scoreGrid');
+  grid.innerHTML = Object.entries(dims).map(([k, v]) => `
+    <div class="score-item">
+      <div class="score-value">${v}</div>
+      <div class="score-label">${k.replace('_', ' ')}</div>
+    </div>
+  `).join('');
+
+  // Decision log
+  const log = document.getElementById('decisionLog');
+  log.innerHTML = '<h3>Decision Trail</h3>';
+  state.decisions.forEach(d => {
+    const mins = Math.floor(d.time_remaining / 60);
+    const secs = d.time_remaining % 60;
+    log.innerHTML += `
+      <div class="log-entry">
+        <div class="log-stage">Stage ${d.stage} — ${d.timestamp}</div>
+        <div class="log-decision">${d.decision_label}</div>
+        <div class="log-time">${mins}:${secs.toString().padStart(2, '0')} remaining on clock</div>
+      </div>
+    `;
+  });
+
+  // Ethical reflection
+  const ethSection = document.getElementById('ethicalSection');
+  ethSection.innerHTML = '<h3>Multi-Constitutional Reflection</h3>';
+  SCENARIO.ethical_tensions.forEach(t => {
+    let html = `<p style="font-family:var(--serif);font-size:16px;color:var(--text);margin-bottom:16px;"><em>${t.tension}</em></p>`;
+    Object.entries(t.traditions).forEach(([name, text]) => {
+      html += `<div class="tradition"><h4>${name}</h4><p>${text}</p></div>`;
+    });
+    ethSection.innerHTML += html;
+  });
+}
+
+// ── EXPORT ──
+document.getElementById('btnExport').addEventListener('click', () => {
+  const exported = {
+    scenario_id: "nfp-001",
+    version: "0.3.0",
+    timestamp: new Date().toISOString(),
+    decisions: state.decisions,
+    final_argumentation: state.arguments,
+    scoring: (() => {
+      const dims = { consistency: 0, proportionality: 0, reversibility: 0, auditability: 0, epistemic_rigor: 0 };
+      const n = state.decisions.length || 1;
+      state.decisions.forEach((d, i) => {
+        const opt = SCENARIO.stages[i]?.options.find(o => o.id === d.decision_id);
+        if (opt) Object.keys(dims).forEach(k => { dims[k] += opt.scores[k]; });
+      });
+      Object.keys(dims).forEach(k => { dims[k] = Math.round(dims[k] / n); });
+      return dims;
+    })()
+  };
+
+  const blob = new Blob([JSON.stringify(exported, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `agora-nfp001-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btnRestart').addEventListener('click', () => {
+  // Reset state
+  state = {
+    currentStage: 0, selectedOption: null, decisions: [],
+    arguments: [
+      { name: "ai_confidence", desc: "AI system reports 87% threat confidence", strength: 0.87, status: "active" },
+      { name: "sensor_reliability", desc: "AI system has 99.99% historical accuracy", strength: 0.7, status: "active" },
+      { name: "measured_response", desc: "Proportional response requires verification", strength: 0.6, status: "active" },
+      { name: "baseline_allow", desc: "Default: allow operations to continue", strength: 0.3, status: "active" }
+    ],
+    timer: 720, timerInterval: null, startTime: null
+  };
+  showScreen('screenBriefing');
+});
+</script>
+</body>
+</html>

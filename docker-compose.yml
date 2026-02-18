@@ -1,0 +1,44 @@
+services:
+  opa:
+    image: openpolicyagent/opa:0.70.0-static
+    command: ["run", "--server", "--addr", "0.0.0.0:8181", "/policies", "/data"]
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./opa/policies:/policies:ro
+      - ./opa/data:/data:ro
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8181/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  claw:
+    build: .
+    ports:
+      - "8787:8787"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - CLAW_MODEL=${CLAW_MODEL:-claude-sonnet-4-5-20250514}
+      - CLAW_POLICY_PACK=${CLAW_POLICY_PACK:-standard}
+      - CLAW_API_KEYS=${CLAW_API_KEYS:-}
+      - CLAW_CORS_ORIGINS=${CLAW_CORS_ORIGINS:-http://localhost:8787,moz-extension://*}
+      - OPA_URL=http://opa:8181
+    depends_on:
+      opa:
+        condition: service_healthy
+    volumes:
+      - claw-data:/app/data
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+
+volumes:
+  claw-data:

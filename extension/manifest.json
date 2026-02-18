@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "AGORA — Governance-First Browser Context",
+  "version": "0.2.0",
+  "description": "Policy-gated, knowledge-enriched, argumentation-resolved browser content analysis",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": { "48": "icons/claw-48.png" }
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content/extractor.js"]
+  }],
+  "host_permissions": ["http://localhost:8787/*"]
+}

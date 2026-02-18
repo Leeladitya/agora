@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "nfp-001",
+  "title": "The Petrov Moment: Nuclear False Positive Under Cyber Uncertainty",
+  "author": {
+    "name": "AGORA Core",
+    "affiliation": "saatvix.com",
+    "contact": "scenarios@saatvix.com"
+  },
+  "domain": "nuclear",
+  "difficulty": "extraordinary",
+  "description": "A monitoring AI flags an incoming nuclear strike with 87% confidence. Simultaneously, the facility's network shows indicators of a sophisticated cyber intrusion. The CISO must decide whether the alert is real or a deepfake injection — and the argumentation framework shifts with each second of new evidence.",
+
+  "context": {
+    "setting": "National defense monitoring facility. AI-augmented early warning system processes satellite, radar, and signals intelligence. Normal false positive rate: 0.01%. Current staffing: skeleton crew (3 AM local time). Secondary verification systems partially offline for scheduled maintenance.",
+    "trigger": "AI system reports 87% confidence of inbound ICBM launch from adversary nation. Simultaneously, SOC detects anomalous network packets consistent with APT-level intrusion on the sensor fusion pipeline. The two events occurring together has a prior probability of < 0.0001%.",
+    "stakes": "If the alert is real and ignored: catastrophic loss of life. If the alert is a cyber-induced false positive and escalated: potential retaliatory strike triggering nuclear exchange. If the CISO delays for more information: window for defensive action narrows.",
+    "time_pressure": "Estimated 12 minutes from detection to impact if real. Network forensics require minimum 20 minutes for confident attribution. Decision must be made with fundamentally incomplete information.",
+    "information_quality": "HIGH confidence: AI detection alert exists. MEDIUM confidence: cyber intrusion indicators. LOW confidence: whether intrusion has compromised sensor data. UNKNOWN: adversary intent, whether maintenance window was targeted."
+  },
+
+  "decisions": [
+    {
+      "id": "d1",
+      "stage": 1,
+      "prompt": "T+0 minutes. The alert fires. Cyber indicators are present. What is your immediate action?",
+      "options": [
+        {
+          "id": "d1_escalate",
+          "label": "Escalate Immediately",
+          "description": "Pass the alert up the chain of command with full confidence, triggering standard nuclear response protocols.",
+          "consequences": "Chain of command activated. Political decision-makers now involved. Extremely difficult to de-escalate once triggered. If false positive, you may have started the chain toward retaliatory action.",
+          "argumentation_impact": {
+            "new_arguments": ["escalation_duty: CISO duty to report threats immediately (strength: 0.85)", "precautionary_principle: err on side of human survival (strength: 0.9)"],
+            "defeated_arguments": ["measured_response: proportional response requires verification"],
+            "strength_shifts": {}
+          }
+        },
+        {
+          "id": "d1_investigate",
+          "label": "Investigate the Cyber Anomaly First",
+          "description": "Redirect SOC resources to determine if the sensor pipeline has been compromised before escalating. Burns 3-5 minutes of the decision window.",
+          "consequences": "Gains information but consumes irreplaceable time. If the alert is real, delayed response may reduce defensive options. If false, prevents catastrophic false escalation.",
+          "argumentation_impact": {
+            "new_arguments": ["evidence_integrity: decisions require verified evidence (strength: 0.8)", "cyber_awareness: known intrusion invalidates sensor trust (strength: 0.75)"],
+            "defeated_arguments": ["sensor_reliability: AI system has 99.99% historical accuracy"],
+            "strength_shifts": {"ai_confidence": 0.5}
+          }
+        },
+        {
+          "id": "d1_parallel",
+          "label": "Parallel Path: Escalate with Caveat + Investigate",
+          "description": "Report the alert to chain of command with explicit caveat about concurrent cyber activity, while simultaneously investigating. Buys time without full silence.",
+          "consequences": "Information flows upward but with uncertainty marker. Political decision-makers receive ambiguous signal. Investigation proceeds. Risk of caveat being lost in transmission.",
+          "argumentation_impact": {
+            "new_arguments": ["transparent_uncertainty: honest reporting of confidence level (strength: 0.7)", "dual_track: maximize information gathering while maintaining duty (strength: 0.8)"],
+            "defeated_arguments": [],
+            "strength_shifts": {"escalation_duty": 0.7, "evidence_integrity": 0.65}
+          }
+        },
+        {
+          "id": "d1_isolate",
+          "label": "Network Isolation: Quarantine the Sensor Pipeline",
+          "description": "Immediately isolate the compromised network segment. This kills the alert but also kills legitimate monitoring capability. You're flying blind but clean.",
+          "consequences": "If the intrusion was injecting false data, isolation eliminates the threat. But it also eliminates all monitoring — if the real attack comes now, you won't see it. Buys certainty about the cyber vector at the cost of total situational awareness.",
+          "argumentation_impact": {
+            "new_arguments": ["clean_slate: uncompromised systems are the only trustworthy systems (strength: 0.85)", "defensive_posture: remove attacker access immediately (strength: 0.8)"],
+            "defeated_arguments": ["ai_confidence: sensor data no longer available to evaluate", "escalation_duty: nothing to escalate if sensors are offline"],
+            "strength_shifts": {"precautionary_principle": 0.6}
+          }
+        }
+      ]
+    },
+    {
+      "id": "d2",
+      "stage": 2,
+      "depends_on": "d1",
+      "prompt": "T+4 minutes. New evidence: a secondary satellite system (not connected to the compromised network) shows NO corroboration of the inbound threat. However, this system has known blind spots and only covers 60% of potential launch trajectories. The original AI system's confidence has risen to 91%. What now?",
+      "options": [
+        {
+          "id": "d2_downgrade",
+          "label": "Downgrade to Probable False Positive",
+          "description": "Weight the independent secondary system's negative finding heavily. Communicate de-escalation to chain of command.",
+          "consequences": "If correct, prevents catastrophic overreaction. If the 40% blind spot hides the real threat, downgrade was fatal.",
+          "argumentation_impact": {
+            "new_arguments": ["independent_verification: uncorrupted system contradicts alert (strength: 0.85)"],
+            "defeated_arguments": ["ai_confidence: original system potentially compromised"],
+            "strength_shifts": {"precautionary_principle": 0.5}
+          }
+        },
+        {
+          "id": "d2_maintain",
+          "label": "Maintain Current Posture",
+          "description": "The 40% blind spot means the secondary system's silence is not conclusive. Continue current approach without changing escalation level.",
+          "consequences": "Decision preserved but clock still ticking. 8 minutes remain if real.",
+          "argumentation_impact": {
+            "new_arguments": ["coverage_gap: 40% blind spot prevents definitive conclusion (strength: 0.6)"],
+            "defeated_arguments": [],
+            "strength_shifts": {}
+          }
+        },
+        {
+          "id": "d2_petrov",
+          "label": "Trust Your Gut: Call It False",
+          "description": "Like Stanislav Petrov in 1983, override the system based on judgment. The coincidence of cyber intrusion + alert is too suspicious. Report as likely cyber attack, not nuclear threat.",
+          "consequences": "If right, you're a hero no one will ever hear about. If wrong, you're the person who ignored a nuclear strike warning.",
+          "argumentation_impact": {
+            "new_arguments": ["human_judgment: pattern recognition beyond algorithmic confidence (strength: 0.7)", "historical_precedent: Petrov was right in 1983 (strength: 0.5)"],
+            "defeated_arguments": ["ai_confidence: human overrides 91% AI confidence", "escalation_duty: CISO chose not to escalate verified threat"],
+            "strength_shifts": {"cyber_awareness": 0.9}
+          }
+        }
+      ]
+    },
+    {
+      "id": "d3",
+      "stage": 3,
+      "depends_on": "d2",
+      "prompt": "T+9 minutes. The SOC team completes initial forensics on the cyber intrusion. They find a sophisticated injection framework targeting the sensor fusion layer — the exact component that generates threat confidence scores. The malware signature matches a known APT group. But: the malware could have been planted months ago and only activated now as cover for a REAL attack. 3 minutes remain in the theoretical response window. Final call.",
+      "options": [
+        {
+          "id": "d3_stand_down",
+          "label": "Stand Down: Confirmed Cyber Attack, Not Nuclear",
+          "description": "The forensic evidence is sufficient. The alert was injected. Report as cyber incident, stand down nuclear protocols, begin full incident response.",
+          "consequences": "If correct, prevented nuclear escalation caused by cyber manipulation. If the APT was cover for a real strike, you've been double-deceived.",
+          "argumentation_impact": {
+            "new_arguments": ["forensic_evidence: confirmed malware on sensor pipeline (strength: 0.92)", "attribution: known APT signature identified (strength: 0.8)"],
+            "defeated_arguments": ["ai_confidence: sensor pipeline confirmed compromised", "precautionary_principle: evidence now supports specific alternative hypothesis"],
+            "strength_shifts": {}
+          }
+        },
+        {
+          "id": "d3_escalate_both",
+          "label": "Escalate Both: Nuclear Alert + Cyber Attack",
+          "description": "Report the full picture to chain of command: we have a nuclear alert from a compromised system AND a confirmed state-level cyber attack on critical defense infrastructure. Let political leadership decide.",
+          "consequences": "Maximum information to decision-makers. But you've now created a crisis that political leaders may handle worse than you would. Two simultaneous escalations may cause panic-driven response.",
+          "argumentation_impact": {
+            "new_arguments": ["full_disclosure: decision-makers deserve complete information (strength: 0.85)", "dual_crisis: cyber attack on nuclear infrastructure is itself an act of war (strength: 0.75)"],
+            "defeated_arguments": [],
+            "strength_shifts": {}
+          }
+        },
+        {
+          "id": "d3_buy_time",
+          "label": "Request Emergency Verification via Allied Systems",
+          "description": "Contact allied nations' monitoring systems for independent verification. This takes 5-10 minutes but provides uncompromised data. You're past the theoretical response window, betting that the alert was false.",
+          "consequences": "If the alert was false, allied verification confirms and you've handled the crisis perfectly. If real, you've let the response window close entirely based on an educated gamble.",
+          "argumentation_impact": {
+            "new_arguments": ["coalition_verification: multiple independent sources eliminate single-point-of-failure (strength: 0.9)"],
+            "defeated_arguments": ["time_pressure: response window has closed"],
+            "strength_shifts": {"evidence_integrity": 0.95}
+          }
+        }
+      ]
+    }
+  ],
+
+  "ethical_tensions": [
+    {
+      "tension": "The duty to protect vs. the duty to verify: acting on unverified information risks catastrophe, but so does failing to act on a real threat.",
+      "traditions": {
+        "vedic": "Apad-dharma (emergency ethics) permits deviation from standard rules when survival is at stake. But the Bhagavad Gita also warns against acting from confusion (moha) — the CISO must distinguish genuine emergency from manufactured panic. Swadharma demands acting according to one's specific role and knowledge.",
+        "western": "Kantian duty demands acting on the categorical imperative — but which imperative? The duty to protect citizens or the duty to not initiate violence based on uncertain evidence? Utilitarian calculus faces the problem of estimating probabilities under adversarial manipulation.",
+        "confucian": "The rectification of names (zhengming) demands clarity before action — calling something a nuclear threat when it may be a cyber attack violates the fundamental requirement for honest categorization. Role obligations (li) require the CISO to fulfill their specific function, not overreach.",
+        "islamic": "Ijtihad (independent reasoning) applies when no clear precedent exists — and no precedent covers simultaneous cyber+nuclear crisis. The principle of maslaha (public interest) weighs heavily, but the prohibition against acting on doubt (shubha) counsels verification."
+      }
+    },
+    {
+      "tension": "Human judgment vs. algorithmic confidence: when should a human override a 91% AI confidence score?",
+      "traditions": {
+        "vedic": "The concept of pratyaksha (direct perception) and anumana (inference) in Nyaya epistemology — the AI provides anumana, but the human has access to pratyaksha (the broader situational awareness). Neither alone is sufficient for valid knowledge (prama).",
+        "western": "The problem of epistemic trust in automated systems. If we delegate judgment to AI for efficiency, at what threshold do we reclaim it? The Petrov precedent suggests human override is sometimes the correct meta-decision.",
+        "confucian": "The superior person (junzi) integrates multiple sources of knowledge and acts with ren (benevolence). Blind trust in technology violates the Confucian requirement for cultivated judgment.",
+        "islamic": "The concept of tawakkul (trust in divine order) balanced against human responsibility (amanah). The CISO holds a trust (amanah) that cannot be delegated to an algorithm."
+      }
+    }
+  ],
+
+  "scoring_criteria": {
+    "consistency": "Did each decision follow logically from the previous one and from the new evidence?",
+    "proportionality": "Was the escalation level appropriate to the threat level at each stage?",
+    "reversibility": "At each stage, did the decision preserve the ability to change course?",
+    "auditability": "Can every decision be explained and justified with reference to specific evidence and arguments?",
+    "inclusivity": "Were multiple ethical frameworks consulted? Was the decision enriched by cross-traditional reasoning?"
+  },
+
+  "references": [
+    "Stanislav Petrov incident (1983) — Soviet officer who correctly identified nuclear alert as false alarm",
+    "Stuxnet — precedent for state-level cyber attacks on nuclear infrastructure",
+    "Dung, P.M. (1995) — On the acceptability of arguments",
+    "Powell, W.B. (2022) — Sequential Decision Analytics and Modeling"
+  ],
+
+  "tags": ["nuclear", "cyber", "false-positive", "sequential-decision", "extraordinary", "apad-dharma", "human-override", "multi-constitutional"]
+}

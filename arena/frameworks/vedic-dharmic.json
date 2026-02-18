@@ -1,0 +1,102 @@
+{
+  "framework_id": "vedic-dharmic",
+  "name": "Vedic Dharmic Framework",
+  "version": "1.0",
+  "description": "Argumentation framework derived from Vedic philosophy, Nyaya epistemology, and dharmic ethics. Applicable to governance decisions where duty, context, and emergency override intersect.",
+
+  "principles": [
+    {
+      "id": "swadharma",
+      "name": "Swadharma (Personal Duty)",
+      "description": "Each role carries specific obligations. A CISO's swadharma is to protect systems and make security decisions. Acting outside one's competence violates swadharma.",
+      "argument_generation": "When a decision falls within the decision-maker's designated role, generate a supporting argument. When it exceeds their role, generate a cautionary argument.",
+      "default_strength": 0.7
+    },
+    {
+      "id": "kuladharma",
+      "name": "Kuladharma (Organizational Duty)",
+      "description": "Obligations to one's organization and team. Decisions must consider institutional continuity and the welfare of colleagues.",
+      "argument_generation": "Generate arguments weighing organizational impact of each decision option.",
+      "default_strength": 0.6
+    },
+    {
+      "id": "rashtradharma",
+      "name": "Rashtradharma (Societal Duty)",
+      "description": "Obligations to the broader society. Security decisions in critical infrastructure carry societal weight beyond the organization.",
+      "argument_generation": "For scenarios affecting public safety or national security, generate high-strength societal duty arguments.",
+      "default_strength": 0.8
+    },
+    {
+      "id": "universal_dharma",
+      "name": "Sanatana Dharma (Universal Ethics)",
+      "description": "Foundational ethical principles: non-harm (ahimsa), truthfulness (satya), non-stealing (asteya). These override lower-level duties when in conflict.",
+      "argument_generation": "Generate arguments from universal ethical principles. These attack lower-level duty arguments when they conflict with fundamental ethics.",
+      "default_strength": 0.95
+    },
+    {
+      "id": "apad_dharma",
+      "name": "Apad-Dharma (Emergency Ethics)",
+      "description": "In extraordinary circumstances (apad), normal rules may be suspended. The Mahabharata recognizes that survival-level crises demand ethical flexibility — but the deviation must be proportional, temporary, and justified.",
+      "argument_generation": "When scenario difficulty is 'extraordinary' and time pressure is extreme, generate apad-dharma arguments that attack rigid rule-following. These arguments must include proportionality constraints.",
+      "default_strength": 0.85,
+      "constraints": ["proportionality", "temporality", "justification_required"]
+    },
+    {
+      "id": "pratyaksha",
+      "name": "Pratyaksha (Direct Perception)",
+      "description": "Nyaya epistemology holds that direct perception is the primary means of valid knowledge. In governance, this means first-hand evidence and direct observation outweigh inference and testimony.",
+      "argument_generation": "Arguments based on direct evidence (sensor data, logs, forensic findings) receive strength bonus. Arguments based purely on inference receive a penalty.",
+      "default_strength": 0.8
+    },
+    {
+      "id": "anumana",
+      "name": "Anumana (Inference)",
+      "description": "Valid inference from known premises. In governance, this covers risk models, probabilistic assessments, and AI confidence scores. Anumana is valid but subordinate to pratyaksha.",
+      "argument_generation": "Arguments based on AI inference, statistical models, or probabilistic reasoning. Valid but attackable by direct evidence arguments.",
+      "default_strength": 0.6
+    },
+    {
+      "id": "shabda",
+      "name": "Shabda (Authoritative Testimony)",
+      "description": "Knowledge from trustworthy sources. In governance, this covers policy documents, regulatory requirements, and expert consultation.",
+      "argument_generation": "Arguments based on authoritative sources (regulations, expert consultation, established policy). Strength varies by source reliability.",
+      "default_strength": 0.65
+    }
+  ],
+
+  "attack_rules": [
+    {
+      "rule": "universal_dharma attacks lower duties when they conflict",
+      "attacker": "universal_dharma",
+      "target": ["swadharma", "kuladharma", "rashtradharma"],
+      "condition": "When following a lower duty would violate ahimsa, satya, or asteya"
+    },
+    {
+      "rule": "apad_dharma attacks all duties in extraordinary circumstances",
+      "attacker": "apad_dharma",
+      "target": ["swadharma", "kuladharma", "rashtradharma", "shabda"],
+      "condition": "When scenario difficulty is 'extraordinary' and time_pressure is extreme"
+    },
+    {
+      "rule": "pratyaksha attacks anumana when they conflict",
+      "attacker": "pratyaksha",
+      "target": ["anumana"],
+      "condition": "When direct evidence contradicts inferential reasoning"
+    },
+    {
+      "rule": "rashtradharma attacks kuladharma in public safety scenarios",
+      "attacker": "rashtradharma",
+      "target": ["kuladharma"],
+      "condition": "When organizational interests conflict with public safety"
+    }
+  ],
+
+  "meta": {
+    "tradition": "Vedic/Hindu",
+    "primary_sources": ["Bhagavad Gita", "Nyaya Sutras", "Mahabharata", "Manusmriti"],
+    "academic_references": [
+      "Ganeri, J. (2001). Philosophy in Classical India.",
+      "Matilal, B.K. (1998). The Character of Logic in India."
+    ]
+  }
+}
