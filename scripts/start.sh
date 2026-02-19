@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────
-#  Claw — Quick Start (without Docker)
+#  AGORA — Quick Start (without Docker)
 #
-#  Starts OPA locally and then the Claw server.
+#  Starts OPA locally and then the AGORA server.
 #  Requires: opa binary, Python 3.11+, ANTHROPIC_API_KEY set
 #
 #  Usage:
@@ -21,7 +21,7 @@ GREEN='\033[0;32m'
 AMBER='\033[0;33m'
 NC='\033[0m'
 
-echo -e "${AMBER}🦞 Claw — Starting...${NC}"
+echo -e "${AMBER}🏛️ AGORA — Starting...${NC}"
 echo ""
 
 # ── Check prerequisites ──────────────────────────────────────────
@@ -79,7 +79,7 @@ fi
 # ── Start Claw Server ───────────────────────────────────────────
 
 echo ""
-echo -e "${AMBER}  Starting Claw server on :8787...${NC}"
+echo -e "${AMBER}  Starting AGORA server on :8787...${NC}"
 echo ""
 
 cd "$ROOT_DIR"
