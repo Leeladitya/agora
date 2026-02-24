@@ -1,7 +1,10 @@
-// AGORA Content Extractor — DOM heuristic extraction
+// Claw Content Extractor — DOM heuristic extraction
 (function() {
   if (window.__clawExtractorLoaded) return;
   window.__clawExtractorLoaded = true;
+
+  // Cross-browser compat: Firefox uses browser.*, Chrome uses chrome.*
+  const B = typeof browser !== "undefined" ? browser : chrome;
 
   function extractContent() {
     // Semantic tag scoring
@@ -53,7 +56,7 @@
   }
 
   // Listen for extraction requests from popup
-  browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  B.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.action === 'extract') {
       try {
         sendResponse({ success: true, data: extractContent() });
